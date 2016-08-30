@@ -57,6 +57,7 @@ export default function ({
 
   const severity = get(result.stylelint, [ "ruleSeverities", ruleName ], "ignore")
 
+  /* istanbul ignore if */
   if (typeof severity === "undefined") {
     throw new Error(
       `The rule name "${ruleName}" has no corresponding registered severity.\n\n` +

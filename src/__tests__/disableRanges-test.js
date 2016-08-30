@@ -281,6 +281,29 @@ test("Nesting disabledRanges", t => {
   )
   planCount += 1
 
+  testDisableRanges(
+    `/* stylelint-disable */
+    /* stylelint-enable bar */
+    /* stylelint-enable foo */
+    /* stylelint-disable foo */
+    /* stylelint-enable bar */
+    /* stylelint-enable */`,
+    result => {
+      t.deepEqual(result.stylelint.disabledRanges, {
+        all: [{ start: 1, end: 6 }],
+        bar: [
+          { start: 1, end: 2 },
+          { start: 1, end: 5 },
+        ],
+        foo: [
+          { start: 1, end: 3 },
+          { start: 4, end: 6 },
+        ],
+      })
+    }
+  )
+  planCount += 1
+
   t.plan(planCount)
 })
 
