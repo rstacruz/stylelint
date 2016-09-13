@@ -10,6 +10,7 @@ const rule = rules[ruleName]
 testRule(rule, {
   ruleName,
   config: [true],
+  skipBasicChecks: true,
 
   accept: [ {
     code: "@import 'x.css';",
@@ -37,6 +38,10 @@ testRule(rule, {
     code: "a { content: ';;'; }",
   }, {
     code: "a { content: ';\t; ;'; }",
+  }, {
+    code: ":root { --foo: red; --bar: blue; }",
+  }, {
+    code: ":root { --foo: { color: red }; --bar: { color: blue }; --foo-bar: { color: blue }; --bar-foo: { color: red }; }",
   } ],
 
   reject: [ {
@@ -474,6 +479,36 @@ testRule(rule, {
     message: messages.rejected,
     line: 6,
     column: 1,
+  }, {
+    code: ":root { --foo: red;; --bar: blue; }",
+    message: messages.rejected,
+    line: 1,
+    column: 20,
+  }, {
+    code: ":root { --foo: red; --bar: blue;; }",
+    message: messages.rejected,
+    line: 1,
+    column: 33,
+  }, {
+    code: ":root { --foo: { color: red };; --bar: { color: blue }; --bar-foo: { color: red }; }",
+    message: messages.rejected,
+    line: 1,
+    column: 31,
+  }, {
+    code: ":root { --foo: { color: red }; --bar: { color: blue };; --bar-foo: { color: red }; }",
+    message: messages.rejected,
+    line: 1,
+    column: 55,
+  }, {
+    code: ":root { --foo: { color: red }; --bar: { color: blue }; --bar-foo: { color: red };; }",
+    message: messages.rejected,
+    line: 1,
+    column: 82,
+  }, {
+    code: "a { --foo: { color: red }; --bar: { color: blue }; --bar-foo: { color: red };; }",
+    message: messages.rejected,
+    line: 1,
+    column: 78,
   } ],
 })
 

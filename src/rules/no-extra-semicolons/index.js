@@ -1,4 +1,6 @@
 import {
+  hasEmptyBlock,
+  isCustomPropertySet,
   report,
   ruleMessages,
   validateOptions,
@@ -51,14 +53,39 @@ export default function (actual) {
     root.walk((node) => {
       if (node.raws.before) {
         const rawBeforeNode = node.raws.before
+        let allowedSemi = 0
+
+        if (node.type === "rule" && isCustomPropertySet(node.selector)) {
+          allowedSemi = 1
+        }
+
+        let countSemi = 0
+
         styleSearch({ source: rawBeforeNode, target: ";" }, match => {
+          countSemi++
+
+          if (countSemi === allowedSemi) { return }
+
           complain(getOffsetByNode(node) - rawBeforeNode.length + match.startIndex)
         })
       }
 
       if (node.raws.after) {
         const rawAfterNode = node.raws.after
+        let allowedSemi = 0
+
+        if (!hasEmptyBlock(node)
+          && node.nodes[node.nodes.length - 1].selector
+          && isCustomPropertySet(node.nodes[node.nodes.length - 1].selector)
+        ) { allowedSemi = 1 }
+
+        let countSemi = 0
+
         styleSearch({ source: rawAfterNode, target: ";" }, match => {
+          countSemi++
+
+          if (countSemi === allowedSemi) { return }
+
           const index = getOffsetByNode(node)
             + node.toString().length - 1
             - rawAfterNode.length
